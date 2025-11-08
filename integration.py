@@ -8,10 +8,18 @@ async def refine_query(user_prompt: str) -> str:
 
     try:
         prompt = f"""
-        Given this query: "{user_prompt}",
-        Rewrite the query into a detailed educational prompt suitable for an LLM to teach a beginner.
-        Include definitions, key subtopics, processes, and concepts the LLM should cover when teaching.
-        Make the final prompt clear, complete, and beginner-friendly.
+        You are an expert educational content designer. Given this user query: "{user_prompt}",
+
+        Rewrite it into a comprehensive and structured prompt suitable for a large language model to generate an educational video script. 
+        The refined prompt should include:
+
+        - Clear definitions of key terms and concepts.
+        - A breakdown of major subtopics or sections.
+        - Step-by-step explanations of processes, mechanisms, or procedures.
+        - Examples, analogies, or visualizations that make concepts easier to understand.
+        - A logical flow that a beginner could follow.
+
+        The final output should be a detailed, beginner-friendly instructional prompt that fully guides an AI to teach this topic in a concise yet thorough way.
         """
 
         result_text = await run_claude_completion(
@@ -38,9 +46,19 @@ async def create_transcript(transcript_prompt: str) -> str:
 
     try:
         prompt = f"""
-        Given this query: "{transcript_prompt}",
-        Create a line-by-line transcript for an educational video lasting at most 30 seconds 
-        with only words that will be spoken (no timestamps) by covering key concepts and procedures.
+        You are now an educational video scriptwriter. Using this refined query: "{transcript_prompt}",
+
+        Generate a line-by-line transcript suitable for a 60-second educational video. Follow these rules:
+
+        - Write only the words that will be spoken (do not include timestamps or stage directions).  
+        - Introduce the topic clearly in the first few lines.  
+        - Cover key concepts, definitions, subtopics
+        - Move on to step-by-step explanations in a simple, beginner-friendly language.  
+        - Include examples or analogies where appropriate to clarify difficult concepts.  
+        - Ensure a smooth, logical flow that is easy for a learner to follow in under a minute.  
+        - Keep sentences concise and engaging, as if speaking to a live audience.  
+
+        The output should be ready to use as a spoken educational transcript.
         """
 
         result_text = await run_claude_completion(
