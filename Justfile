@@ -73,10 +73,12 @@ build: build-frontend
 # Clean all build artifacts and caches
 clean:
     rm -rf frontend/dist
-    rm -rf frontend/node_modules/.vite
+    rm -rf frontend/node_modules
     rm -rf backend/output
     rm -rf backend/tmp
     rm -rf backend/.mypy_cache
+    rm -rf backend/.ruff_cache
+    rm -rf .claude/
     find . -type d -name __pycache__ -exec rm -rf {} +
     find . -type f -name "*.pyc" -delete
 
@@ -84,5 +86,5 @@ clean:
 setup: install
     @echo "Setting up backend environment..."
     @test -f backend/.env || cp backend/.env.example backend/.env
-    @echo "✅ Setup complete! Edit backend/.env with your API keys"
+    @echo "Setup complete! Edit backend/.env with your API keys"
     @echo "Then run 'just dev' to start development servers"

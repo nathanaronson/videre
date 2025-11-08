@@ -20,6 +20,7 @@ just --list
 ### Manual Setup
 
 **Frontend:**
+
 ```bash
 cd frontend
 npm install
@@ -28,6 +29,7 @@ npm run dev
 Frontend runs on `http://localhost:5173`
 
 **Backend:**
+
 ```bash
 cd backend
 uv pip install -e .
@@ -35,16 +37,19 @@ cp .env.example .env
 # Edit .env with your API keys
 flask --app videre.app run --debug
 ```
+
 Backend runs on `http://localhost:5000`
 
 ## Technologies
 
 **Frontend:**
+
 - React + TypeScript
 - Vite
 - Tailwind CSS
 
 **Backend:**
+
 - Python 3.12+
 - Flask
 - Dedalus (LLM)
@@ -54,6 +59,7 @@ Backend runs on `http://localhost:5000`
 ## Development
 
 Common commands:
+
 - `just dev` - Run frontend + backend dev servers
 - `just lint` - Lint all code
 - `just clean` - Clean build artifacts
