@@ -1,0 +1,52 @@
+[project]
+name = "videre-backend"
+version = "0.1.0"
+description = "Backend for Videre - LLM-powered video generation with Dedalus, Manim, and ElevenLabs"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    # Web framework
+    "flask>=3.0.0",
+    "flask-cors>=5.0.0",
+
+    # HTTP clients
+    "requests>=2.32.0",
+
+    # Data validation
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+
+    # Environment variables
+    "python-dotenv>=1.0.0",
+
+    # Logging
+    "structlog>=24.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/videre"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
