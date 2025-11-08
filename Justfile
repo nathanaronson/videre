@@ -90,3 +90,6 @@ setup: install
     @test -f backend/.env || cp backend/.env.example backend/.env
     @echo "Setup complete! Edit backend/.env with your API keys"
     @echo "Then run 'just dev' to start development servers"
+
+# Reset the project (clean and setup)
+reset: clean setup
