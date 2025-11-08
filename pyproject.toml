@@ -8,4 +8,5 @@ dependencies = [
     "httpx>=0.24.0",
     "elevenlabs>=2.22.0",
     "anthropic>=0.72.0",
+    "boto3>=1.40.69",
 ]
