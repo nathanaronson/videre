@@ -8,29 +8,23 @@ dependencies = [
     # Web framework
     "flask>=3.0.0",
     "flask-cors>=6.0.0",
-
     # HTTP clients
     "requests>=2.32.0",
-
     # Data validation
     "pydantic>=2.9.0",
     "pydantic-settings>=2.6.0",
-
     # Environment variables
     "python-dotenv>=0.21.0,<0.22.0",
-
     # Logging
     "structlog>=25.5.0",
-
+    # Package management (required for manim-voiceover)
+    "setuptools>=75.0.0",
     # Manim Voiceover
     "manim-voiceover>=0.3.7",
-
     # Manim
     "manim>=0.19.0",
-
     # ElevenLabs TTS
     "elevenlabs>=2.22.0",
-
     # Dedalus LLM framework
     "dedalus-labs>=0.0.1",
 ]
@@ -61,4 +55,5 @@ python_version = "3.12"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+
 
