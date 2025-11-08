@@ -7,12 +7,36 @@ import FeatureCard from '@/components/FeatureCard';
 import { toast } from 'sonner';
 const Index = () => {
   const [topic, setTopic] = useState('');
-  const handleGenerate = () => {
+  const [transcript, setTranscript] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const handleGenerate = async () => {
     if (!topic.trim()) {
       toast.error('Please enter a topic to learn about');
       return;
     }
+    setLoading(true);
+    setTranscript(null);
     toast.success(`Generating video about: ${topic}`);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/integrate?topic=${encodeURIComponent(topic)}`
+      );
+      const data = await response.json();
+
+      if (data.error) {
+        toast.error("Error generating transcript");
+        console.error(data.error);
+      } else {
+        setTranscript(data.transcript);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to call backend");
+    } finally {
+      setLoading(false);
+    }
+
     // Video generation logic would go here
   };
   const handleKeyPress = (e: React.KeyboardEvent) => {
