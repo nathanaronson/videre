@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from claude_client import run_claude_completion, ClaudeError
+from .claude_client import run_claude_completion, ClaudeError
 
 load_dotenv()
 
