@@ -26,6 +26,7 @@ cd frontend
 npm install
 npm run dev
 ```
+
 Frontend runs on `http://localhost:5173`
 
 **Backend:**
@@ -67,3 +68,33 @@ Common commands:
 See `Justfile` for all available commands or run `just --list`
 
 For detailed setup instructions, see README files in `frontend/` and `backend/`.
+
+## Installation
+
+### LaTeX for Manim
+
+**Install TinyTeX via Homebrew**:
+
+```bash
+brew install --cask tinytex
+```
+
+**Use `tlmgr` to install the necessary packages**:
+
+```bash
+tlmgr install \
+  amsmath babel-english cbfonts-fd cm-super count1to ctex doublestroke dvisvgm everysel \
+  fontspec frcursive fundus-calligra gnu-freefont jknapltx latex-bin mathastext microtype multitoc \
+  physics preview prelim2e ragged2e relsize rsfs setspace standalone tipa wasy wasysym xcolor xetex xkeyval
+```
+
+**Create Symbolic Links (Optional)**:
+
+For binaries like `dvisvgm` or `pdflatex`, you may need a symlink to make them accessible system-wide:
+
+```bash
+# Replace [username] with your macOS username and [binary_name] with the executable
+ln -s /Users/[username]/Library/TinyTeX/bin/universal-darwin/[binary_name] /usr/local/bin/[binary_name]
+```
+
+> This step is optional if the binary is already in your PATH.
