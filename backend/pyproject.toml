@@ -18,7 +18,7 @@ dependencies = [
     # Logging
     "structlog>=25.5.0",
     # Package management (required for manim-voiceover)
-    "setuptools>=75.0.0",
+    "setuptools>=80.9.0",
     # Manim Voiceover
     "manim-voiceover>=0.3.7",
     # Manim
