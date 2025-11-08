@@ -9,8 +9,7 @@ from manim_voiceover.services.gtts import GTTSService
 class BookmarkExample(VoiceoverScene):
     def construct(self):
         # self.set_speech_service(CoquiService(transcription_model='base'))
-        self.set_speech_service(GTTSService(lang="en", tld="com"))
-
+        self.set_speech_service(GTTSService(lang="en", tld="com", transcription_model="base"))
 
         blist = BulletedList(
             "Trigger animations", "At any word", "Bookmarks", font_size=64

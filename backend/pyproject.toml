@@ -20,7 +20,7 @@ dependencies = [
     # Package management (required for manim-voiceover)
     "setuptools>=80.9.0",
     # Manim Voiceover
-    "manim-voiceover[gTTS]>=0.3.7",
+    "manim-voiceover[gTTS, transcribe]>=0.3.7",
     # Manim
     "manim>=0.19.0",
     # ElevenLabs TTS
