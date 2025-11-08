@@ -73,10 +73,10 @@ For detailed setup instructions, see README files in `frontend/` and `backend/`.
 
 ### LaTeX for Manim
 
-**Install TinyTeX via Homebrew**:
+**Install TinyTeX**:
 
 ```bash
-brew install --cask tinytex
+curl -sL "https://yihui.org/tinytex/install-bin-unix.sh" | sh
 ```
 
 **Use `tlmgr` to install the necessary packages**:
