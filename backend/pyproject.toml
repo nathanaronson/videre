@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     # Web framework
     "flask>=3.0.0",
-    "flask-cors>=5.0.0",
+    "flask-cors>=6.0.0",
 
     # HTTP clients
     "requests>=2.32.0",
@@ -17,10 +17,19 @@ dependencies = [
     "pydantic-settings>=2.6.0",
 
     # Environment variables
-    "python-dotenv>=1.0.0",
+    "python-dotenv>=0.21.0,<0.22.0",
 
     # Logging
-    "structlog>=24.4.0",
+    "structlog>=25.5.0",
+
+    # Manim
+    "manim-voiceover>=0.3.7",
+
+    # ElevenLabs TTS
+    "elevenlabs>=2.22.0",
+
+    # Dedalus LLM framework
+    "dedalus-labs>=0.0.1",
 ]
 
 [project.optional-dependencies]

@@ -31,11 +31,11 @@ preview-frontend:
 
 # Install backend dependencies
 install-backend:
-    cd backend && uv pip install -e .
+    cd backend && uv venv && uv pip install -e .
 
 # Install backend dev dependencies
 install-backend-dev:
-    cd backend && uv pip install -e ".[dev]"
+    cd backend && uv venv && uv pip install -e ".[dev]"
 
 # Run backend server
 dev-backend:
@@ -78,6 +78,8 @@ clean:
     rm -rf backend/tmp
     rm -rf backend/.mypy_cache
     rm -rf backend/.ruff_cache
+    rm -rf backend/.venv
+    rm backend/.env
     rm -rf .claude/
     find . -type d -name __pycache__ -exec rm -rf {} +
     find . -type f -name "*.pyc" -delete
