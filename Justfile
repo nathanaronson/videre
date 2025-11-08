@@ -73,12 +73,10 @@ build: build-frontend
 # Clean all build artifacts and caches
 clean:
     rm -rf frontend/dist
-    rm -rf frontend/node_modules
     rm -rf backend/output
     rm -rf backend/tmp
     rm -rf backend/.mypy_cache
     rm -rf backend/.ruff_cache
-    rm -rf backend/.venv
     rm -rf .claude/
     rm -rf .mypy_cache/
     find . -type d -name __pycache__ -exec rm -rf {} +

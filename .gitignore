@@ -74,4 +74,4 @@ Thumbs.db
 *.lock
 
 # Media
-media/
+backend/media/
