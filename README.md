@@ -90,7 +90,7 @@ tlmgr install \
 
 **Create Symbolic Links (Optional)**:
 
-For binaries like `dvisvgm` or `pdflatex`, you may need a symlink to make them accessible system-wide:
+For binaries like `dvisvgm`, you may need a symlink to make them accessible system-wide:
 
 ```bash
 # Replace [username] with your macOS username and [binary_name] with the executable
