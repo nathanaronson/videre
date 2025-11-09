@@ -42,20 +42,27 @@ if __name__ == "__main__":
         print("File uploaded successfully!")
     else:
         print("File upload failed.")
-
-def create_presigned_url(video_uuid):
-    """Create a presigned URL for a video in S3"""
+        
+def create_presigned_url(video_uuid: str) -> str:
     bucket_name = os.getenv("AWS_MP4_S3_BUCKET_ID")
-    aws_region = os.getenv("AWS_REGION", "us-east-2")
 
-    print(video_uuid, bucket_name, aws_region)
+    # Use a neutral client to ask S3 where the bucket lives
+    s3 = boto3.client("s3", config=Config(signature_version="s3v4"))
+    loc = s3.get_bucket_location(Bucket=bucket_name)["LocationConstraint"]
+    bucket_region = loc or "us-east-1"  # AWS returns None for us-east-1
 
-    # Create an S3 client with signature version 4
-    config = Config(signature_version='s3v4')
-    s3_client = boto3.client('s3', config=config, region_name=aws_region)
-    presigned_url = s3_client.generate_presigned_url('get_object',
-                                                    Params={'Bucket': bucket_name,
-                                                            'Key': f'{video_uuid}.mp4'},
-                                                    ExpiresIn=3600)
-    print(presigned_url)
-    return presigned_url
+    # Build a *regional* client so the signed host matches the region
+    regional_s3 = boto3.client(
+        "s3",
+        region_name=bucket_region,
+        config=Config(signature_version="s3v4", s3={"addressing_style": "virtual"}),
+        endpoint_url=f"https://s3.{bucket_region}.amazonaws.com"
+            if bucket_region != "us-east-1"
+            else "https://s3.amazonaws.com",  # us-east-1 quirk
+    )
+
+    return regional_s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket_name, "Key": f"{video_uuid}.mp4"},
+        ExpiresIn=3600,
+    )
