@@ -9,7 +9,7 @@ from pathlib import Path
 
 from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
-
+from .fetch_context7_docs import fetch_context7_docs
 
 async def generate_video_with_gtts(topic, event_callback=None):
     # Generate UUID for this video
@@ -21,6 +21,12 @@ async def generate_video_with_gtts(topic, event_callback=None):
     API_KEY = os.getenv("ANTHROPIC_API_KEY")
     ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
 
+    try:
+        context7_docs = await fetch_context7_docs()
+    except Exception as e:
+        print(f"Warning: could not fetch Context7 docs: {e}")
+        context7_docs = "No context available (fallback)."
+
     max_tokens = 4096
 
     prompt = f"""
@@ -28,7 +34,10 @@ async def generate_video_with_gtts(topic, event_callback=None):
 
     You are an expert educator and Manim animator.
 
-    Use Context7’s live docs to ensure correctness.
+    Use Context7’s live docs to ensure correctness:
+
+    {context7_docs}
+
     Generate complete Manim Voiceover code for "{topic}"...
 
     Given the topic: "{topic}", generate **one complete, end-to-end script and runnable Manim code** that teaches this concept visually. Follow these rules:
@@ -52,7 +61,7 @@ async def generate_video_with_gtts(topic, event_callback=None):
         from manim import *
         from manim_voiceover import VoiceoverScene
         from manim_voiceover.services.gtts import GTTSService
-    8. Define a class `GeneratedScene(VoiceoverScene)` with construct() containing all animations.
+    8. Define a class `{scene_class_name}(VoiceoverScene)` with construct() containing all animations.
     9. The code must be **standalone and directly runnable**, producing an MP4 with synced voiceover.
     10. **Do not summarize, generalize, or skip steps.** Every step of the example must be concrete.
     11. A beginner to the topic should fully understand all key topics, procedures, and solutions after watching the produced video animation and script.
