@@ -1,3 +1,4 @@
+import asyncio
 import os
 import re
 import subprocess
@@ -6,7 +7,7 @@ import traceback
 import uuid
 from pathlib import Path
 
-from anthropic import Anthropic
+from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
 
 
@@ -19,8 +20,6 @@ async def generate_video_with_gtts(topic, event_callback=None):
     load_dotenv()
     API_KEY = os.getenv("ANTHROPIC_API_KEY")
     ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
-
-    client = Anthropic(api_key=API_KEY)
 
     max_tokens = 4096
 
@@ -64,11 +63,10 @@ async def generate_video_with_gtts(topic, event_callback=None):
     """
 
     print("Generating highly specific Manim code + voiceover...")
-    
-    # if event_callback:
-    #     await event_callback("video_generation_status", {"message": "Generating Manim code with AI..."})
 
-    response = client.messages.create(
+    async_client = AsyncAnthropic(api_key=API_KEY)
+
+    response = await async_client.messages.create(
         max_tokens=max_tokens,
         messages=[{"role": "user", "content": prompt}],
         model="claude-sonnet-4-5-20250929",
@@ -101,23 +99,35 @@ async def generate_video_with_gtts(topic, event_callback=None):
         await event_callback("video_generation_status", {"message": "Rendering video with Manim (this may take a minute)..."})
 
     try:
-        # Run Manim using uv from project root
+        # Run Manim using uv from project root (using async subprocess)
         project_root = Path(__file__).parent.parent.parent
-        result = subprocess.run(
-            ["uv", "run", "manim", "-qh", str(manim_file), scene_class_name],
-            capture_output=True,
-            text=True,
-            check=True,
+
+        # Use asyncio.create_subprocess_exec for non-blocking execution
+        process = await asyncio.create_subprocess_exec(
+            "uv", "run", "manim", "-qh", str(manim_file), scene_class_name,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
             cwd=str(project_root),
         )
+
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            raise subprocess.CalledProcessError(
+                process.returncode,
+                ["uv", "run", "manim", "-qh", str(manim_file), scene_class_name],
+                stdout.decode(),
+                stderr.decode()
+            )
+
         print("Manim run complete.")
-        
+
         if event_callback:
             await event_callback("video_generation_rendering_complete", {"message": "Video rendering complete!"})
-        print(result.stdout)
-        if result.stderr:
+        print(stdout.decode())
+        if stderr:
             print("STDERR:")
-            print(result.stderr)
+            print(stderr.decode())
 
         # Manim saves the video relative to project_root (where we run it from)
         # The video will be at: project_root / "media" / "videos" / "generated_scene" / "1080p60" / f"{scene_class_name}.mp4"

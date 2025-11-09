@@ -82,30 +82,32 @@ async def integrate_endpoint(payload: TopicPayload):
             async def emit_status(event_type: str, data: dict):
                 event_str = await _emit_event(event_type, data)
                 await event_queue.put(event_str)
-            
+                # Add a small delay to ensure the event is processed
+                await asyncio.sleep(0)
+
             # Start video generation
             yield await _emit_event("video_generation_start", {"message": "Starting video generation..."})
-            
+
             # Generate video with event callback (run in background)
             async def generate_task():
                 return await generate_video_with_gtts(payload.topic, emit_status)
-            
+
             generation_task = asyncio.create_task(generate_task())
-            
+
             # Yield events as they come in while generation is running
             while not generation_task.done():
                 try:
-                    event = await asyncio.wait_for(event_queue.get(), timeout=0.1)
+                    # Wait for events with a short timeout
+                    event = await asyncio.wait_for(event_queue.get(), timeout=0.5)
                     yield event
                 except asyncio.TimeoutError:
-                    # Check if task is still running
-                    if generation_task.done():
-                        break
+                    # Send a heartbeat comment to keep connection alive
+                    yield ": heartbeat\n\n"
                     continue
-            
+
             # Get the result
             result = await generation_task
-            
+
             # Yield any remaining events
             while not event_queue.empty():
                 event = await event_queue.get()
@@ -167,7 +169,15 @@ async def integrate_endpoint(payload: TopicPayload):
         except Exception as e:
             yield await _emit_event("error", {"message": str(e)})
 
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
+        }
+    )
 
 
 @app.post("/api/chat-history", response_model=ChatHistoryResponse)
