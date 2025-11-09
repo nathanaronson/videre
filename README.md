@@ -1,6 +1,6 @@
 # Videre - HackPrinceton 2025
 
-AI-powered video generation platform using Dedalus LLM, Manim animations, and ElevenLabs text-to-speech.
+AI-powered video generation platform using Manim animations and ElevenLabs.
 
 ## Quick Start
 
