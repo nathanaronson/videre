@@ -86,7 +86,7 @@ async def generate_video_with_gtts(topic, event_callback=None):
         # Run Manim using uv from project root
         project_root = Path(__file__).parent.parent.parent
         result = subprocess.run(
-            ["uv", "run", "manim", "-pqh", str(manim_file), scene_class_name],
+            ["uv", "run", "manim", "-qh", str(manim_file), scene_class_name],
             capture_output=True,
             text=True,
             check=True,
