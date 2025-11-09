@@ -41,7 +41,7 @@ install-backend-dev:
 
 # Run backend server
 dev-backend:
-    cd backend && flask --app videre.app run --debug --host 0.0.0.0 --port 5000
+    cd backend/src/videre && uv run uvicorn videre.main:app --reload
 
 
 # Lint backend code
@@ -81,6 +81,7 @@ clean:
     rm -rf backend/.ruff_cache
     rm -rf .claude/
     rm -rf .mypy_cache/
+    rm -rf backend/media/
     find . -type d -name __pycache__ -exec rm -rf {} +
     find . -type f -name "*.pyc" -delete
 

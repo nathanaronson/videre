@@ -6,11 +6,12 @@ to interact with Claude's API.
 Environment variables supported:
 - CLAUDE_API_KEY (required)
 """
-import os
-from dotenv import load_dotenv
-import anthropic
 import asyncio
+import os
 from functools import partial
+
+import anthropic
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -35,7 +36,7 @@ async def run_claude_completion(
         raise ClaudeError("No API key found. Set CLAUDE_API_KEY in the environment")
 
     client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
-    
+
     try:
         loop = asyncio.get_event_loop()
         response = await loop.run_in_executor(

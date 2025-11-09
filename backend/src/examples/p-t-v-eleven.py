@@ -170,7 +170,7 @@ try:
         # List what's actually in the media directory
         media_dir = Path(temp_dir) / "media"
         if media_dir.exists():
-            print(f"\nContents of media directory:")
+            print("\nContents of media directory:")
             for item in media_dir.rglob("*"):
                 print(f"  {item}")
 
