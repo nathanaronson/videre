@@ -9,7 +9,7 @@ from pathlib import Path
 
 from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
-
+from .fetch_context7_docs import fetch_context7_docs
 
 async def generate_video_with_gtts(topic, event_callback=None):
     # Generate UUID for this video
@@ -21,8 +21,22 @@ async def generate_video_with_gtts(topic, event_callback=None):
     API_KEY = os.getenv("ANTHROPIC_API_KEY")
     ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
 
-    # Stronger, more concrete prompt
+    try:
+        context7_docs = await fetch_context7_docs()
+    except Exception as e:
+        print(f"Warning: could not fetch Context7 docs: {e}")
+        context7_docs = "No context available (fallback)."
+
+    max_tokens = 4096
+
     prompt = f"""
+
+    use library /manimcommunity/manim-voiceover
+
+    Use Context7’s live docs to ensure correctness:
+
+    {context7_docs}
+
     You are an expert educator and Manim animator. 
     Given the topic: "{topic}", generate **one complete, end-to-end script and runnable Manim code** that teaches this concept visually. Follow these rules:
 
@@ -58,11 +72,10 @@ async def generate_video_with_gtts(topic, event_callback=None):
 
     print("Generating highly specific Manim code + voiceover...")
 
-    # Use async Anthropic client for non-blocking API calls
     async_client = AsyncAnthropic(api_key=API_KEY)
 
     response = await async_client.messages.create(
-        max_tokens=4096,
+        max_tokens=max_tokens,
         messages=[{"role": "user", "content": prompt}],
         model="claude-sonnet-4-5-20250929",
     )
