@@ -48,9 +48,10 @@ async def generate_video_with_gtts(topic, event_callback=None):
 
         load_dotenv()
         ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
-    9. Define a class `{scene_class_name}(VoiceoverScene)` with construct() containing all animations.
-    10. The code must be **standalone and directly runnable**, producing an MP4 with synced voiceover.
-    11. **Do not summarize, generalize, or skip steps.** Every step of the example must be concrete.
+    9. For the speech service service, use voice_id: TVtDNgumMv4lb9zzFzA2
+    10. Define a class `{scene_class_name}(VoiceoverScene)` with construct() containing all animations.
+    11. The code must be **standalone and directly runnable**, producing an MP4 with synced voiceover.
+    12. **Do not summarize, generalize, or skip steps.** Every step of the example must be concrete.
 
     Return **only the Python code**, starting with `import os`, no explanations, no markdown, no extra text.
     """
