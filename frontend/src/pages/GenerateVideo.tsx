@@ -103,9 +103,9 @@ const GenerateVideo = ({
                     prev.map((step, idx) => ({
                       ...step,
                       status:
-                        idx === 0
+                        idx === 1 || idx === 0
                           ? "completed"
-                          : idx === 1
+                          : idx === 2
                           ? "processing"
                           : step.status,
                     }))
@@ -118,9 +118,9 @@ const GenerateVideo = ({
                     prev.map((step, idx) => ({
                       ...step,
                       status:
-                        idx === 1
+                        idx === 2
                           ? "completed"
-                          : idx === 2
+                          : idx === 3
                           ? "processing"
                           : step.status,
                     }))
@@ -133,9 +133,9 @@ const GenerateVideo = ({
                     prev.map((step, idx) => ({
                       ...step,
                       status:
-                        idx === 2
+                        idx === 3
                           ? "completed"
-                          : idx === 3
+                          : idx === 4
                           ? "processing"
                           : step.status,
                     }))
