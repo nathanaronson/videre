@@ -1,32 +1,47 @@
 # Videre Backend
 
-Flask backend for video generation with Dedalus, Manim, and ElevenLabs.
+FastAPI backend for video generation with Dedalus, Manim, and ElevenLabs.
 
 ## Structure
 
 ```
 src/videre/
-├── app.py              # Flask app & routes
-├── config.py           # Settings
-├── dedalus.py          # LLM client
-├── manim_service.py    # Video generation
-└── elevenlabs.py       # TTS
+├── main.py             # FastAPI app & routes
+├── claude_client.py    # Claude/Anthropic client
+├── integration.py      # Integration logic
+└── utils/
+    └── send_to_aws.py  # AWS utilities
 ```
 
 ## Setup
 
 ```bash
-just install-backend-dev
-cp backend/.env.example backend/.env
-# Add API keys to .env
-just dev-backend
+cd backend
+uv sync
 ```
 
-Server: `http://localhost:5000`
+## Running the Server
+
+From the `backend` directory:
+
+```bash
+uv run uvicorn videre.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Or from the `backend/src` directory:
+
+```bash
+uv run uvicorn videre.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Server: `http://localhost:8000`
 
 ## Dependencies
 
-- Flask + Flask-CORS
+- FastAPI
+- uvicorn
 - requests
 - pydantic
 - python-dotenv
+- manim
+- manim-voiceover

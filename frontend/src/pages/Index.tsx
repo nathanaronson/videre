@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Sparkles, Zap, Brain, Video, Search, TrendingUp } from 'lucide-react';
-import GeometricBackground from '@/components/GeometricBackground';
-import FeatureCard from '@/components/FeatureCard';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Sparkles, Zap, Brain, Video, Search, TrendingUp } from "lucide-react";
+import GeometricBackground from "@/components/GeometricBackground";
+import FeatureCard from "@/components/FeatureCard";
+import { toast } from "sonner";
 const Index = () => {
-  const [topic, setTopic] = useState('');
+  const [topic, setTopic] = useState("");
   const [transcript, setTranscript] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const handleGenerate = async () => {
     if (!topic.trim()) {
-      toast.error('Please enter a topic to learn about');
+      toast.error("Please enter a topic to learn about");
       return;
     }
     setLoading(true);
@@ -19,9 +19,14 @@ const Index = () => {
     toast.success(`Generating video about: ${topic}`);
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/integrate?topic=${encodeURIComponent(topic)}`
-      );
+      console.log(topic);
+      const response = await fetch(`http://localhost:8000/api/integrate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ topic: topic }),
+      });
       const data = await response.json();
 
       if (data.error) {
@@ -40,13 +45,14 @@ const Index = () => {
     // Video generation logic would go here
   };
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleGenerate();
     }
   };
-  return <div className="min-h-screen bg-background relative">
+  return (
+    <div className="min-h-screen bg-background relative">
       <GeometricBackground />
-      
+
       {/* Hero Section */}
       <section className="relative container mx-auto px-4 py-20 md:py-32">
         <div className="max-w-4xl mx-auto text-center">
@@ -55,15 +61,15 @@ const Index = () => {
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-foreground">AI-Powered Visual Learning</span>
           </div>
-          
+
           {/* Main Heading */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             Videre,{' '}
             <span className="text-gradient">Teach Me...</span>
           </h1>
-          
+
           <p className="text-muted-foreground mb-12 max-w-2xl mx-auto text-lg">Clear, informative math and CS videos, in one click</p>
-          
+
           {/* Search Input - Fully functional */}
           <div className="max-w-2xl mx-auto mb-8">
             <div className="relative group">
@@ -71,7 +77,6 @@ const Index = () => {
               <div className="absolute -inset-1 bg-gradient-primary rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300 pointer-events-none" />
 
               <div className="relative flex flex-col p-6 sm:p-8 rounded-2xl border border-border/50 backdrop-blur-sm shadow-elevated bg-sky-800">
-      
                 {/* Top-left input with icon */}
                 <div className="flex items-center gap-2 mb-4">
                   <Search className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -80,7 +85,7 @@ const Index = () => {
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     onKeyPress={(e) => {
-                      if (e.key === 'Enter') handleGenerate();
+                      if (e.key === "Enter") handleGenerate();
                     }}
                     placeholder="teach me about..."
                     className="flex-1 bg-transparent text-sm italic text-muted-foreground outline-none placeholder:text-muted-foreground"
@@ -99,11 +104,9 @@ const Index = () => {
                     Create Video
                   </Button>
                 </div>
-
               </div>
             </div>
           </div>
-          
         </div>
       </section>
 
@@ -157,9 +160,13 @@ const Index = () => {
       {/* Footer */}
       <footer className="relative border-t border-border/50 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 Videre. Making mathematics and computer science accessible through AI.</p>
+          <p>
+            © 2025 Videre. Making mathematics and computer science accessible
+            through AI.
+          </p>
         </div>
       </footer>
-    </div>;
+    </div>
+  );
 };
 export default Index;
