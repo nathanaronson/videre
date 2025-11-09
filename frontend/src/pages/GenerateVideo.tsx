@@ -37,21 +37,18 @@ const GenerateVideo = () => {
 
   const generateVideo = async () => {
     try {
-      // Start the API call
-      const formData = new FormData();
-      formData.append('topic', topic);
-      if (file) {
-        formData.append('file', file);
-      }
-      formData.append('inputMode', inputMode);
-
-      // Simulate step progression while waiting for the actual API response
+      // Simulate step progression for UI feedback
+      // Steps progress every 8 seconds (6 steps = ~48 seconds total)
       const stepProgressionInterval = setInterval(() => {
         setSteps(prev => {
           const currentProcessingIndex = prev.findIndex(s => s.status === 'processing');
           const currentPendingIndex = prev.findIndex(s => s.status === 'pending');
 
           if (currentProcessingIndex !== -1) {
+            // Don't progress past the last step until we get a response
+            if (currentProcessingIndex === prev.length - 1) {
+              return prev; // Keep last step processing
+            }
             // Mark current as completed and move to next
             return prev.map((step, idx) => ({
               ...step,
@@ -69,31 +66,39 @@ const GenerateVideo = () => {
           }
           return prev;
         });
-      }, 3000);
+      }, 8000);
 
       // Make actual API call to backend
-      const response = await fetch('http://localhost:5000/api/generate', {
+      const response = await fetch('http://localhost:8000/api/integrate', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic }),
       });
 
       clearInterval(stepProgressionInterval);
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate video');
+        throw new Error(errorData.detail || 'Failed to generate video');
       }
 
       const data = await response.json();
 
+      if (!data.success) {
+        throw new Error('Video generation failed');
+      }
+
       // Mark all steps as completed
       setSteps(prev => prev.map(step => ({ ...step, status: 'completed' })));
 
-      setVideoUrl(data.videoUrl);
+      // Use the video URL from the backend response
+      setVideoUrl(data.video_url);
 
       // Navigate to video display after a short delay
       setTimeout(() => {
-        navigate('/video', { state: { videoUrl: data.videoUrl, topic, localPath: data.localPath } });
+        navigate('/video', { state: { videoUrl: data.video_url, topic } });
       }, 1500);
 
     } catch (err) {

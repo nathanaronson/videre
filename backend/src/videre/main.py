@@ -1,5 +1,7 @@
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,6 +9,8 @@ from pydantic import BaseModel
 # from .integration import integrate
 from .utils.create_video import generate_video_with_gtts
 from .utils.send_to_aws import upload_file_to_s3
+
+load_dotenv()
 
 app = FastAPI()
 app.add_middleware(
@@ -34,8 +38,8 @@ async def integrate_endpoint(payload: TopicPayload):
     print(payload)
     try:
         result = await generate_video_with_gtts(payload.topic)
-        if not result:
-            raise HTTPException(status_code=500, detail="Failed to generate video")
+        if not result or result[0] is None or result[1] is None:
+            raise HTTPException(status_code=500, detail="Failed to generate video - no valid result returned")
 
         video_uuid, scene_class_name = result
 
@@ -51,6 +55,12 @@ async def integrate_endpoint(payload: TopicPayload):
 
         upload_file_to_s3(str(video_path), video_uuid)
         print("Video uploaded to AWS successfully.")
-        return {"success": True, "video_id": video_uuid}
+
+        # Construct the S3 URL
+        bucket_name = os.getenv("AWS_MP4_S3_BUCKET_ID", "videre-s3")
+        aws_region = os.getenv("AWS_REGION", "us-east-1")
+        video_url = f"https://{bucket_name}.s3.{aws_region}.amazonaws.com/{video_uuid}.mp4"
+
+        return {"success": True, "video_id": video_uuid, "video_url": video_url}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

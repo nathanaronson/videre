@@ -26,7 +26,6 @@ const Index = () => {
     'dynamic programming'
   ];
   const [currentTopicIndex, setCurrentTopicIndex] = useState(0);
-  const [uuid, setUUID] = useState("");
 
   useEffect(() => {
     if (topic) return; // Don't show placeholder animation if user is typing
@@ -102,31 +101,7 @@ const Index = () => {
       return;
     }
 
-    try {
-      const response = await fetch(
-        `http://localhost:8000/api/integrate`
-      , {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ topic: topic }),
-      });
-      const data = await response.json();
-      console.log(data);
-
-      if (data.error) {
-        toast.error("Error generating transcript");
-        console.error(data.error);
-      } else {
-        setUUID(data.uuid);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to call backend");
-    } 
-    
-    // Navigate to loading screen with the topic/file data
+    // Navigate to loading screen immediately
     navigate("/generate", {
       state: {
         topic: inputMode === "text" ? topic : selectedFile?.name,
