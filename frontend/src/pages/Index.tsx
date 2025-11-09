@@ -84,15 +84,15 @@ const Index = () => {
 
   const handleGenerate = async () => {
     if (inputMode === 'text' && !topic.trim()) {
-      toast.error('Please enter a topic to learn about');
+      toast.error('Please enter a topic.');
       return;
     }
     if (inputMode === 'file' && !selectedFile) {
-      toast.error('Please select a file');
+      toast.error('Please select a file.');
       return;
     }
     if (inputMode === 'screenshot' && !selectedFile) {
-      toast.error('Please upload a screenshot');
+      toast.error('Please upload a screenshot.');
       return;
     }
 
