@@ -52,6 +52,20 @@ db-stop:
 db-restart:
     brew services restart mongodb-community
 
+# Reset MongoDB database (drops all data)
+db-reset:
+    #!/usr/bin/env bash
+    echo "⚠️  WARNING: This will delete all data in the 'videre' database!"
+    read -p "Are you sure you want to continue? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "Dropping 'videre' database..."
+        mongosh videre --eval "db.dropDatabase()" --quiet
+        echo "✓ Database reset complete"
+    else
+        echo "Database reset cancelled"
+    fi
+
 # === Backend Commands ===
 
 # Install backend dependencies
