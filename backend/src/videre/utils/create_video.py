@@ -1,19 +1,20 @@
 import os
+import re
 import subprocess
 import tempfile
-from pathlib import Path
-from anthropic import Anthropic
-from dotenv import load_dotenv
-import re
-import shutil
 import traceback
 import uuid
+from pathlib import Path
+
+from anthropic import Anthropic
+from dotenv import load_dotenv
+
 
 async def generate_video_with_gtts(topic):
     # Generate UUID for this video
     video_uuid = str(uuid.uuid4())
     scene_class_name = f"Scene_{video_uuid.replace('-', '_')}"  # Python class names can't have hyphens
-    
+
     # Load environment variables
     load_dotenv()
     API_KEY = os.getenv("ANTHROPIC_API_KEY")

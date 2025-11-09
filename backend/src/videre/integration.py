@@ -10,7 +10,7 @@
 #         prompt = f"""
 #         You are an expert educational content designer. Given this user query: "{user_prompt}",
 
-#         Rewrite it into a comprehensive and structured prompt suitable for a large language model to generate an educational video script. 
+#         Rewrite it into a comprehensive and structured prompt suitable for a large language model to generate an educational video script.
 #         The refined prompt should include:
 
 #         - Clear definitions of key terms and concepts.
@@ -50,13 +50,13 @@
 
 #         Generate a line-by-line transcript suitable for a 60-second educational video. Follow these rules:
 
-#         - Write only the words that will be spoken (do not include timestamps or stage directions).  
-#         - Introduce the topic clearly in the first few lines.  
+#         - Write only the words that will be spoken (do not include timestamps or stage directions).
+#         - Introduce the topic clearly in the first few lines.
 #         - Cover key concepts, definitions, subtopics
-#         - Move on to step-by-step explanations in a simple, beginner-friendly language.  
-#         - Include examples or analogies where appropriate to clarify difficult concepts.  
-#         - Ensure a smooth, logical flow that is easy for a learner to follow in under a minute.  
-#         - Keep sentences concise and engaging, as if speaking to a live audience.  
+#         - Move on to step-by-step explanations in a simple, beginner-friendly language.
+#         - Include examples or analogies where appropriate to clarify difficult concepts.
+#         - Ensure a smooth, logical flow that is easy for a learner to follow in under a minute.
+#         - Keep sentences concise and engaging, as if speaking to a live audience.
 
 #         The output should be ready to use as a spoken educational transcript.
 #         """
