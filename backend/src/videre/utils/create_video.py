@@ -34,13 +34,18 @@ async def generate_video_with_gtts(topic, event_callback=None):
     4. Visuals must exactly match the narration: animate nodes, arrows, numbers, highlighting choices, distances, and transitions.
     5. Break the narration into voiceover blocks using `with self.voiceover(text=...) as tracker:` and include the corresponding animations in each block.
     6. Use dynamic, light, and visually appealing effects: shapes, colors, MathTex, arrows, graphs, smooth transitions.
-    7. Start with these exact imports:
+    7. When writing Manim code, you must follow the exact format:
+    Code(
+       code_string=\"<your code here>\",
+       language="<language>",
+    ). Under no circumstances shall you include a parameter for font_size, code, only the exact example above.
+    8. Start with these exact imports:
         from manim import *
         from manim_voiceover import VoiceoverScene
         from manim_voiceover.services.gtts import GTTSService
-    8. Define a class `{scene_class_name}(VoiceoverScene)` with construct() containing all animations.
-    9. The code must be **standalone and directly runnable**, producing an MP4 with synced voiceover.
-    10. **Do not summarize, generalize, or skip steps.** Every step of the example must be concrete.
+    9. Define a class `{scene_class_name}(VoiceoverScene)` with construct() containing all animations.
+    10. The code must be **standalone and directly runnable**, producing an MP4 with synced voiceover.
+    11. **Do not summarize, generalize, or skip steps.** Every step of the example must be concrete.
 
     Return **only the Python code**, starting with `import os`, no explanations, no markdown, no extra text.
     """
