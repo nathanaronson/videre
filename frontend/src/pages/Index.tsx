@@ -173,29 +173,41 @@ const Index = ({ topic, setTopic }: { topic: string, setTopic: (topic: string) =
 
             <div className="relative flex flex-col p-6 sm:p-8 rounded-2xl border border-border/50 backdrop-blur-sm shadow-elevated bg-sky-800">
               {/* Top-left input with icon */}
-              <div className="flex items-center gap-2 mb-8">
-                <Search className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) => {
-                    setTopic(e.target.value);
-                    if (inputMode !== 'text') {
-                      setInputMode('text');
-                      setSelectedFile(null);
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleGenerate();
-                  }}
-                  placeholder={topic ? '' : placeholderText}
-                  className="flex-1 bg-transparent text-sm italic text-foreground outline-none placeholder:text-muted-foreground"
-                  autoFocus
-                />
+              <div className="flex flex-col gap-2 mb-4">
+                <div className="flex items-start gap-2">
+                  <Search className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-1" />
+                  <textarea
+                    value={topic}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.length <= 500) {
+                        setTopic(value);
+                        if (inputMode !== 'text') {
+                          setInputMode('text');
+                          setSelectedFile(null);
+                        }
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleGenerate();
+                      }
+                    }}
+                    placeholder={topic ? '' : placeholderText}
+                    className="flex-1 bg-transparent text-sm italic text-foreground outline-none placeholder:text-muted-foreground resize-none min-h-[80px] max-h-[200px]"
+                    autoFocus
+                    rows={4}
+                    style={{ overflow: 'auto' }}
+                  />
+                </div>
+                <div className="text-xs text-muted-foreground text-right">
+                  {topic.length} / 500
+                </div>
               </div>
 
               {/* Bottom row: icons on left, button on right */}
-              <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center justify-between pt-0">
                 {/* Icon buttons on the left */}
                 <div className="flex items-center gap-2">
                   {/* Hidden file inputs */}

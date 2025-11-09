@@ -86,8 +86,8 @@ async def generate_video_with_gtts(topic, event_callback=None):
         await event_callback("video_generation_manim_generated", {"message": "Manim code generated. Preparing to render video..."})
 
     # Robust cleanup of any markdown backticks or language hints
-    manim_code = re.sub(r"^```(python)?\s*", "", manim_code)
-    manim_code = re.sub(r"\s*```$", "", manim_code)
+    manim_code = re.sub(r"^```(?:python)?", "", manim_code, flags=re.MULTILINE).strip()
+    manim_code = re.sub(r"```$", "", manim_code, flags=re.MULTILINE).strip()
 
     print("=" * 60)
     print("GENERATED MANIM CODE:")
