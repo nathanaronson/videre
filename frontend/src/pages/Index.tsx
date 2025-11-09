@@ -34,13 +34,16 @@ const Index = () => {
     let currentIndex = 0;
     const currentTopic = topics[currentTopicIndex];
     const prefix = 'Teach me about ';
+    const suffix = '.';
 
     if (isTyping) {
       // Typing forward
-      if (currentIndex < currentTopic.length) {
+      if (currentIndex <= currentTopic.length) {
         const typeChar = () => {
-          if (currentIndex < currentTopic.length) {
-            setPlaceholderText(prefix + currentTopic.slice(0, currentIndex + 1));
+          if (currentIndex <= currentTopic.length) {
+            const textPart = currentTopic.slice(0, currentIndex);
+            const punctuation = currentIndex === currentTopic.length ? suffix : '';
+            setPlaceholderText(prefix + textPart + punctuation);
             currentIndex++;
             typingTimer = setTimeout(typeChar, 80);
           } else {
@@ -52,10 +55,12 @@ const Index = () => {
       }
     } else {
       // Deleting
-      currentIndex = currentTopic.length;
+      currentIndex = currentTopic.length + 1;
       const deleteChar = () => {
         if (currentIndex > 0) {
-          setPlaceholderText(prefix + currentTopic.slice(0, currentIndex - 1));
+          const textPart = currentTopic.slice(0, Math.min(currentIndex - 1, currentTopic.length));
+          const punctuation = currentIndex > currentTopic.length ? suffix : '';
+          setPlaceholderText(prefix + textPart + punctuation);
           currentIndex--;
           typingTimer = setTimeout(deleteChar, 50);
         } else {
