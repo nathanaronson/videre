@@ -108,9 +108,33 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Mathematical grid background */}
+      <div className="absolute inset-0 opacity-[0.06] pointer-events-none">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+      </div>
+
+      {/* Subtle dots pattern */}
+      <div className="absolute inset-0 opacity-[0.08] pointer-events-none">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="currentColor"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dots)" />
+        </svg>
+      </div>
+
       {/* Background gradient spots */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-secondary/15 via-secondary/8 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary/15 via-primary/8 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-secondary/12 via-secondary/6 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-2xl w-full text-center relative z-10">
         {/* Title */}
