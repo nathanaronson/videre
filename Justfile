@@ -1,6 +1,8 @@
 # Videre - Justfile
 # Run `just --list` to see all available commands
 
+set dotenv-load
+
 # Default recipe - show help
 default:
     @just --list

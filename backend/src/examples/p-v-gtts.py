@@ -17,18 +17,31 @@ client = Anthropic(api_key=API_KEY)
 
 # Get topic from user
 topic = input("Enter a topic you'd like to learn about: ").strip()
+max_tokens = 4096
 
-# Stronger, more concrete prompt
 prompt = f"""
-You are an expert educator and Manim animator. 
+use library /manimcommunity/manim-voiceover
+
+You are an expert educator and Manim animator.
+
+Use Context7’s live docs to ensure correctness.
+Generate complete Manim Voiceover code for "{topic}"...
+
 Given the topic: "{topic}", generate **one complete, end-to-end script and runnable Manim code** that teaches this concept visually. Follow these rules:
 
-1. Create a **clear, step-by-step 1-minute script** (~150–180 words) for GTTS narration.
-2. The narration must include **specific examples, concrete values, and reasoning**. 
-   - For instance, if explaining a graph traversal: "We visit node A first because its distance 3 is the smallest among neighbors. Then we go to node B with distance 5..." 
-   - The script should explicitly describe every step, value, and choice.
-3. Immediately generate **complete, runnable Python code** using Manim + manim-voiceover that visualizes each step.
-4. Visuals must exactly match the narration: animate nodes, arrows, numbers, highlighting choices, distances, and transitions.
+0. Videos must have constant nonstop animation, with corresponding text to speech in exactly 60 seconds. 
+   - There should be action at every second of the 60 seconds, either in the form of animation or speech or both.
+1. Create a **clear, step-by-step 60 second script** for GTTS.
+   - Ensure script and code is produced so that it fits the maximum tokens allowed: {max_tokens}.
+2. The narration must start with **defining definitions, then describe procedure, then demonstrating concrete examples with reasoning, then conclude.**. 
+   - For instance, if explaining a graph traversal: "Graph traversal is [definition]. First, visit node 'A' because [reasoning]. Then, we go to node B because [reasoning].." 
+   - The script should explicitly describe every step, reasoning, and choice.
+3. Immediately generate **complete, runnable Python code** using Manim + manim-voiceover that visualizes each step corresponding to the script.
+    - There must be no blank spaces within the video with no animations or speech.
+    - Do not add visuals in safe areas or outside of canvas restrictions (writing stays centralized and intuitive).
+4. Visuals must exactly match the narration: animate nodes, arrows for pointers, colors, numbers, matrices, highlighting choices, distances, and transitions.
+    - Visuals such as numbers and symbols should not be written over.
+    - Include proper signs ('=', '+', etc.) and symbols for the topic.
 5. Break the narration into voiceover blocks using `with self.voiceover(text=...) as tracker:` and include the corresponding animations in each block.
 6. Use dynamic, light, and visually appealing effects: shapes, colors, MathTex, arrows, graphs, smooth transitions.
 7. Start with these exact imports:
@@ -38,13 +51,16 @@ Given the topic: "{topic}", generate **one complete, end-to-end script and runna
 8. Define a class `GeneratedScene(VoiceoverScene)` with construct() containing all animations.
 9. The code must be **standalone and directly runnable**, producing an MP4 with synced voiceover.
 10. **Do not summarize, generalize, or skip steps.** Every step of the example must be concrete.
+11. A beginner to the topic should fully understand all key topics, procedures, and solutions after watching the produced video animation and script.
+13. Remember, you are creating two separate things: a text script with proper punctuation, and Manim python code with proper python syntax.
+14. Only values of type VMobject can be added as submobjects of VGroup, but the value Mobject (at index 0 of parameter 9) is of type Mobject. You can try adding this value into a Group instead.
 
 Return **only the Python code**, starting with `import os`, no explanations, no markdown, no extra text.
 """
 
 print("Generating highly specific Manim code + voiceover...")
 response = client.messages.create(
-    max_tokens=4096,
+    max_tokens=max_tokens,
     messages=[{"role": "user", "content": prompt}],
     model="claude-sonnet-4-5-20250929",
 )
