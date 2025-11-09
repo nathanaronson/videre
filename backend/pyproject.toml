@@ -26,6 +26,9 @@ dependencies = [
     # ElevenLabs TTS
     "elevenlabs>=0.2.27",
     "anthropic>=0.72.0",
+    "boto3>=1.40.69",
+    "fastapi>=0.121.1",
+    "uvicorn[standard]>=0.32.0",
 ]
 
 [project.optional-dependencies]
