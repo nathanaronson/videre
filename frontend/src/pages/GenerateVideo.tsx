@@ -125,7 +125,7 @@ const GenerateVideo = () => {
             onClick={() => navigate('/')}
             className="text-primary hover:underline"
           >
-            Go back
+            Try Again
           </button>
         </div>
       </div>
