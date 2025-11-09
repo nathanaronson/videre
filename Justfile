@@ -39,7 +39,7 @@ install-backend-dev:
 
 # Run backend server
 dev-backend:
-    cd backend && flask --app videre.app run --debug --host 0.0.0.0 --port 5000
+    cd backend/src/videre && uv run uvicorn videre.main:app --reload
 
 
 # Lint backend code
