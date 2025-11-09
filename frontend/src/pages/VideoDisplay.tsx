@@ -3,40 +3,39 @@ import { Button } from '@/components/ui/button';
 import { Download, Home, Share2, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 
-const VideoDisplay = () => {
+const VideoDisplay = ({ topic, videoURL }: { topic: string, videoURL: string }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { videoUrl, topic } = location.state || {};
 
-  if (!videoUrl) {
+  if (!topic || !videoURL) {
     navigate('/');
     return null;
   }
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: `Videre: ${topic}`,
-        text: `Check out this educational video about ${topic}`,
-        url: videoUrl,
-      }).catch(() => {
-        // User cancelled share
-      });
-    } else {
-      navigator.clipboard.writeText(videoUrl);
-      toast.success('Video URL copied to clipboard!');
-    }
-  };
+  // const handleShare = () => {
+  //   if (navigator.share) {
+  //     navigator.share({
+  //       title: `Videre: ${topic}`,
+  //       text: `Check out this educational video about ${topic}`,
+  //       url: videoUrl,
+  //     }).catch(() => {
+  //       // User cancelled share
+  //     });
+  //   } else {
+  //     navigator.clipboard.writeText(videoUrl);
+  //     toast.success('Video URL copied to clipboard!');
+  //   }
+  // };
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = videoUrl;
-    link.download = `${topic.replace(/\s+/g, '_')}_video.mp4`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Download started!');
-  };
+  // const handleDownload = () => {
+  //   const link = document.createElement('a');
+  //   link.href = videoUrl;
+  //   link.download = `${topic.replace(/\s+/g, '_')}_video.mp4`;
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  //   toast.success('Download started!');
+  // };
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,7 +73,7 @@ const VideoDisplay = () => {
             <video
               controls
               className="w-full aspect-video"
-              src={videoUrl}
+              src={videoURL}
               autoPlay
             >
               Your browser does not support the video tag.
@@ -83,7 +82,7 @@ const VideoDisplay = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3 justify-center">
-            <Button
+            {/* <Button
               variant="default"
               onClick={handleDownload}
               className="flex items-center gap-2"
@@ -98,7 +97,7 @@ const VideoDisplay = () => {
             >
               <Share2 className="w-4 h-4" />
               Share
-            </Button>
+            </Button> */}
             <Button
               variant="outline"
               onClick={() => navigate('/')}

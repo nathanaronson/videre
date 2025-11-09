@@ -7,25 +7,31 @@ import Index from "./pages/Index";
 import GenerateVideo from "./pages/GenerateVideo";
 import VideoDisplay from "./pages/VideoDisplay";
 import NotFound from "./pages/NotFound";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/generate" element={<GenerateVideo />} />
-          <Route path="/video" element={<VideoDisplay />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [topic, setTopic] = useState<string>('');
+  const [videoURL, setVideoURL] = useState<string>('');
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index topic={topic} setTopic={setTopic} />} />
+            <Route path="/generate" element={<GenerateVideo topic={topic} setVideoURL={setVideoURL} />} />
+            <Route path="/video" element={<VideoDisplay topic={topic} videoURL={videoURL} />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Paperclip, Camera, Video, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
-const Index = () => {
-  const [topic, setTopic] = useState('');
+const Index = ({ topic, setTopic }: { topic: string, setTopic: (topic: string) => void }) => {
   const [inputMode, setInputMode] = useState<'text' | 'file' | 'screenshot'>('text');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const navigate = useNavigate();

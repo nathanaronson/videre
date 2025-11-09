@@ -10,7 +10,7 @@ from anthropic import Anthropic
 from dotenv import load_dotenv
 
 
-async def generate_video_with_gtts(topic):
+async def generate_video_with_gtts(topic, event_callback=None):
     # Generate UUID for this video
     video_uuid = str(uuid.uuid4())
     scene_class_name = f"Scene_{video_uuid.replace('-', '_')}"  # Python class names can't have hyphens
@@ -46,6 +46,9 @@ async def generate_video_with_gtts(topic):
     """
 
     print("Generating highly specific Manim code + voiceover...")
+    
+    # if event_callback:
+    #     await event_callback("video_generation_status", {"message": "Generating Manim code with AI..."})
 
     response = client.messages.create(
         max_tokens=4096,
@@ -54,6 +57,9 @@ async def generate_video_with_gtts(topic):
     )
 
     manim_code = response.content[0].text.strip()
+    
+    if event_callback:
+        await event_callback("video_generation_manim_generated", {"message": "Manim code generated. Preparing to render video..."})
 
     # Robust cleanup of any markdown backticks or language hints
     manim_code = re.sub(r"^```(python)?\s*", "", manim_code)
@@ -72,6 +78,9 @@ async def generate_video_with_gtts(topic):
         f.write(manim_code)
 
     print(f"Saved Manim code to temporary file: {manim_file}")
+    
+    if event_callback:
+        await event_callback("video_generation_status", {"message": "Rendering video with Manim (this may take a minute)..."})
 
     try:
         # Run Manim using uv from project root
@@ -84,6 +93,9 @@ async def generate_video_with_gtts(topic):
             cwd=str(project_root),
         )
         print("Manim run complete.")
+        
+        if event_callback:
+            await event_callback("video_generation_rendering_complete", {"message": "Video rendering complete!"})
         print(result.stdout)
         if result.stderr:
             print("STDERR:")
