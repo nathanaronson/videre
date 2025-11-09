@@ -79,6 +79,7 @@ clean:
     rm -rf backend/.ruff_cache
     rm -rf .claude/
     rm -rf .mypy_cache/
+    rm -rf backend/media/
     find . -type d -name __pycache__ -exec rm -rf {} +
     find . -type f -name "*.pyc" -delete
 
