@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Paperclip, Camera, Video, Search } from 'lucide-react';
+import { Paperclip, Camera, Video, Search, History } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = ({ topic, setTopic }: { topic: string, setTopic: (topic: string) => void }) => {
@@ -112,6 +112,19 @@ const Index = ({ topic, setTopic }: { topic: string, setTopic: (topic: string) =
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
+      {/* History button in top right */}
+      <div className="absolute top-6 right-6 z-20">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate('/history')}
+          className="flex items-center gap-2"
+        >
+          <History className="w-4 h-4" />
+          View History
+        </Button>
+      </div>
+
       {/* Mathematical grid background */}
       <div className="absolute inset-0 opacity-[0.06] pointer-events-none">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">

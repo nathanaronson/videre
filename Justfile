@@ -29,6 +29,31 @@ lint-frontend:
 preview-frontend:
     cd frontend && npm run preview
 
+# === Database Commands ===
+
+# Check MongoDB status
+db-status:
+    #!/usr/bin/env bash
+    if pgrep -x mongod > /dev/null; then
+        echo "✓ MongoDB is running"
+        mongosh --eval "db.adminCommand('ping')" --quiet 2>/dev/null || echo "MongoDB process found but connection failed"
+    else
+        echo "✗ MongoDB is not running"
+        echo "Run 'just db-start' to start MongoDB"
+    fi
+
+# Start MongoDB
+db-start:
+    brew services start mongodb-community
+
+# Stop MongoDB
+db-stop:
+    brew services stop mongodb-community
+
+# Restart MongoDB
+db-restart:
+    brew services restart mongodb-community
+
 # === Backend Commands ===
 
 # Install backend dependencies
@@ -39,8 +64,18 @@ install-backend:
 install-backend-dev:
     cd backend && uv venv && uv pip install -e ".[dev]"
 
+# Ensure MongoDB is running
+ensure-mongodb:
+    #!/usr/bin/env bash
+    if ! pgrep -x mongod > /dev/null; then
+        echo "MongoDB is not running. Starting MongoDB..."
+        brew services start mongodb-community 2>/dev/null || echo "Note: Could not start MongoDB via brew services. Please start MongoDB manually."
+    else
+        echo "MongoDB is already running ✓"
+    fi
+
 # Run backend server
-dev-backend:
+dev-backend: ensure-mongodb
     cd backend/src/videre && uv run uvicorn videre.main:app --reload
 
 
@@ -89,8 +124,18 @@ clean:
 setup: install
     @echo "Setting up backend environment..."
     @test -f backend/.env || cp backend/.env.example backend/.env
-    @echo "Setup complete! Edit backend/.env with your API keys"
-    @echo "Then run 'just dev' to start development servers"
+    @echo ""
+    @echo "✓ Setup complete!"
+    @echo ""
+    @echo "Next steps:"
+    @echo "1. Edit backend/.env with your API keys"
+    @echo "2. Install MongoDB: brew install mongodb-community (if not installed)"
+    @echo "3. Run 'just dev' to start development servers (MongoDB will auto-start)"
+    @echo ""
+    @echo "Useful commands:"
+    @echo "  just db-status  - Check if MongoDB is running"
+    @echo "  just db-start   - Start MongoDB manually"
+    @echo "  just dev        - Start frontend + backend (auto-starts MongoDB)"
 
 # Reset the project (clean and setup)
 reset: clean setup

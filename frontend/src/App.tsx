@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import GenerateVideo from "./pages/GenerateVideo";
 import VideoDisplay from "./pages/VideoDisplay";
+import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 import { useState } from "react";
 
@@ -25,6 +26,7 @@ const App = () => {
             <Route path="/" element={<Index topic={topic} setTopic={setTopic} />} />
             <Route path="/generate" element={<GenerateVideo topic={topic} setVideoURL={setVideoURL} />} />
             <Route path="/video" element={<VideoDisplay topic={topic} videoURL={videoURL} />} />
+            <Route path="/history" element={<History setTopic={setTopic} setVideoURL={setVideoURL} />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
