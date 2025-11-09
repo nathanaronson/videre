@@ -162,7 +162,7 @@ const Index = ({ topic, setTopic }: { topic: string, setTopic: (topic: string) =
 
         {/* Subtitle below Videre */}
         <p className="text-sm text-muted-foreground mb-12">
-          One click, one video.
+          See it. Master it.
         </p>
 
         {/* Main Input Box - Similar to original design */}
