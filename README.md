@@ -98,3 +98,10 @@ ln -s /Users/[username]/Library/TinyTeX/bin/universal-darwin/[binary_name] /usr/
 ```
 
 > This step is optional if the binary is already in your PATH.
+
+### MongoDB
+
+```bash
+brew tap mongodb/brew
+brew install mongodb-community
+```
