@@ -28,6 +28,7 @@ const Index = () => {
         body: JSON.stringify({ topic: topic }),
       });
       const data = await response.json();
+      console.log(data);
 
       if (data.error) {
         toast.error("Error generating transcript");

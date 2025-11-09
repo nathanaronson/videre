@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 api_key = os.getenv("ANTHROPIC_API_KEY")
+ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
 
 client = Anthropic(api_key=api_key)
 
@@ -59,17 +60,26 @@ Script:
 {transcript}
 
 Requirements:
-- Use manim-voiceover with the set_speech_service method to integrate narration
+- Start with these exact imports:
+  import os
+  from manim import *
+  from manim_voiceover import VoiceoverScene
+  from manim_voiceover.services.elevenlabs import ElevenLabsService
+  from dotenv import load_dotenv
+
+  load_dotenv()
+  ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
+
 - Create a Scene class called GeneratedScene that extends VoiceoverScene
-- Use self.set_speech_service() at the beginning of construct() - you can use any service (e.g., GTTSService, ElevenLabsService if API key available)
-- Break the script into logical segments using with self.voiceover(text=...) blocks
+- In construct(), use: self.set_speech_service(ElevenLabsService(api_key=ELEVEN_API_KEY, voice_id="29vD33N1CtxCmqQRPOHJ"))
+- Break the script into logical segments using with self.voiceover(text=...) as tracker: blocks
 - For each voiceover block, create relevant animations that visualize the concepts
 - Use Manim objects like Text, MathTex, shapes, graphs, arrows, etc. to illustrate ideas
 - Make animations smooth and well-paced to match the narration
 - Include visual transitions and effects where appropriate
-- The code should be complete and runnable
+- The code should be complete and runnable as a standalone Python file
 
-Return ONLY the Python code, no explanations or markdown formatting. The code should start with imports.
+Return ONLY the Python code, no explanations, no markdown code blocks, no extra text. Just the raw Python code starting with 'import os'.
 """
 
 print("\nGenerating Manim code...")
@@ -85,6 +95,19 @@ manim_message = client.messages.create(
 )
 
 manim_code = manim_message.content[0].text
+
+# Clean up the code if it's wrapped in markdown code blocks
+if manim_code.startswith("```python"):
+    # Remove ```python from the start and ``` from the end
+    manim_code = manim_code.split("```python", 1)[1]
+    manim_code = manim_code.rsplit("```", 1)[0]
+    manim_code = manim_code.strip()
+elif manim_code.startswith("```"):
+    # Remove ``` from the start and end
+    manim_code = manim_code.split("```", 1)[1]
+    manim_code = manim_code.rsplit("```", 1)[0]
+    manim_code = manim_code.strip()
+
 print("=" * 60)
 print("GENERATED MANIM CODE:")
 print("=" * 60)
@@ -103,26 +126,38 @@ print(f"Manim code saved to: {manim_file}")
 print("\nExecuting Manim to generate video...")
 
 try:
-    # Run manim to generate the video
+    # Run manim to generate the video using uv with high quality and preview
+    # Use the project root directory for execution (where pyproject.toml is)
+    project_root = Path(__file__).parent.parent.parent
+
+    print(f"Running from project root: {project_root}")
+    print(f"Executing: uv run manim -pqh {manim_file} GeneratedScene")
+
     result = subprocess.run(
-        ["manim", str(manim_file), "GeneratedScene", "-ql"],
+        ["uv", "run", "manim", "-pqh", str(manim_file), "GeneratedScene"],
         capture_output=True,
         text=True,
-        check=True
+        check=True,
+        cwd=str(project_root)
     )
 
     print("MANIM OUTPUT:")
     print(result.stdout)
+    if result.stderr:
+        print("STDERR:")
+        print(result.stderr)
 
-    # Find the generated video
-    output_dir = Path(temp_dir) / "media" / "videos" / "generated_scene" / "480p15"
+    # Find the generated video (high quality is 1080p60)
+    output_dir = Path(temp_dir) / "media" / "videos" / "generated_scene" / "1080p60"
     video_files = list(output_dir.glob("*.mp4"))
 
     if video_files:
         video_path = video_files[0]
-        final_path = Path.cwd() / f"{topic.replace(' ', '_')}_video.mp4"
+        # Save to backend/src/examples directory
+        output_location = Path(__file__).parent
+        final_path = output_location / f"{topic.replace(' ', '_')}_video.mp4"
 
-        # Copy to current directory
+        # Copy to examples directory
         import shutil
         shutil.copy(video_path, final_path)
 
@@ -131,6 +166,13 @@ try:
         print(f"{'=' * 60}")
     else:
         print("Warning: Could not find generated video file")
+        print(f"Searched in: {output_dir}")
+        # List what's actually in the media directory
+        media_dir = Path(temp_dir) / "media"
+        if media_dir.exists():
+            print(f"\nContents of media directory:")
+            for item in media_dir.rglob("*"):
+                print(f"  {item}")
 
 except subprocess.CalledProcessError as e:
     print(f"Error running Manim: {e}")
@@ -138,3 +180,5 @@ except subprocess.CalledProcessError as e:
     print(f"STDERR: {e.stderr}")
 except Exception as e:
     print(f"Error: {e}")
+    import traceback
+    traceback.print_exc()
