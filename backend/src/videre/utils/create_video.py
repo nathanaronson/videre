@@ -40,9 +40,14 @@ async def generate_video_with_gtts(topic, event_callback=None):
        language="<language>",
     ). Under no circumstances shall you include a parameter for font_size, code, only the exact example above.
     8. Start with these exact imports:
+        import os
         from manim import *
         from manim_voiceover import VoiceoverScene
-        from manim_voiceover.services.gtts import GTTSService
+        from manim_voiceover.services.elevenlabs import ElevenLabsService
+        from dotenv import load_dotenv
+
+        load_dotenv()
+        ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
     9. Define a class `{scene_class_name}(VoiceoverScene)` with construct() containing all animations.
     10. The code must be **standalone and directly runnable**, producing an MP4 with synced voiceover.
     11. **Do not summarize, generalize, or skip steps.** Every step of the example must be concrete.
@@ -67,8 +72,8 @@ async def generate_video_with_gtts(topic, event_callback=None):
         await event_callback("video_generation_manim_generated", {"message": "Manim code generated. Preparing to render video..."})
 
     # Robust cleanup of any markdown backticks or language hints
-    manim_code = re.sub(r"^```(python)?\s*", "", manim_code)
-    manim_code = re.sub(r"\s*```$", "", manim_code)
+    manim_code = re.sub(r"^```(?:python)?", "", manim_code, flags=re.MULTILINE).strip()
+    manim_code = re.sub(r"```$", "", manim_code, flags=re.MULTILINE).strip()
 
     print("=" * 60)
     print("GENERATED MANIM CODE:")
