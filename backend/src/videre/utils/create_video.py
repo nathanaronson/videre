@@ -30,43 +30,42 @@ async def generate_video_with_gtts(topic, event_callback=None):
     max_tokens = 4096
 
     prompt = f"""
-    use library /manimcommunity/manim-voiceover
 
-    You are an expert educator and Manim animator.
+    use library /manimcommunity/manim-voiceover
 
     Use Context7’s live docs to ensure correctness:
 
     {context7_docs}
 
-    Generate complete Manim Voiceover code for "{topic}"...
-
+    You are an expert educator and Manim animator. 
     Given the topic: "{topic}", generate **one complete, end-to-end script and runnable Manim code** that teaches this concept visually. Follow these rules:
 
-    0. Videos must have constant nonstop animation, with corresponding text to speech in exactly 60 seconds. 
-    - There should be action at every second of the 60 seconds, either in the form of animation or speech or both.
-    1. Create a **clear, step-by-step 60 second script** for GTTS.
-    - Ensure script and code is produced so that it fits the maximum tokens allowed: {max_tokens}.
-    2. The narration must start with **defining definitions, then describe procedure, then demonstrating concrete examples with reasoning, then conclude.**. 
-    - For instance, if explaining a graph traversal: "Graph traversal is [definition]. First, visit node 'A' because [reasoning]. Then, we go to node B because [reasoning].." 
-    - The script should explicitly describe every step, reasoning, and choice.
-    3. Immediately generate **complete, runnable Python code** using Manim + manim-voiceover that visualizes each step corresponding to the script.
-        - There must be no blank spaces within the video with no animations or speech.
-        - Do not add visuals in safe areas or outside of canvas restrictions (writing stays centralized and intuitive).
-    4. Visuals must exactly match the narration: animate nodes, arrows for pointers, colors, numbers, matrices, highlighting choices, distances, and transitions.
-        - Visuals such as numbers and symbols should not be written over.
-        - Include proper signs ('=', '+', etc.) and symbols for the topic.
+    1. Create a **clear, step-by-step 1-minute script** (~150–180 words) for GTTS narration.
+    2. The narration must include **specific examples, concrete values, and reasoning**. 
+    - For instance, if explaining a graph traversal: "We visit node A first because its distance 3 is the smallest among neighbors. Then we go to node B with distance 5..." 
+    - The script should explicitly describe every step, value, and choice.
+    3. Immediately generate **complete, runnable Python code** using Manim + manim-voiceover that visualizes each step.
+    4. Visuals must exactly match the narration: animate nodes, arrows, numbers, highlighting choices, distances, and transitions.
     5. Break the narration into voiceover blocks using `with self.voiceover(text=...) as tracker:` and include the corresponding animations in each block.
     6. Use dynamic, light, and visually appealing effects: shapes, colors, MathTex, arrows, graphs, smooth transitions.
-    7. Start with these exact imports:
+    7. When writing Manim code, you must follow the exact format:
+    Code(
+       code_string=\"<your code here>\",
+       language="<language>",
+    ). Under no circumstances shall you include a parameter for font_size, code, only the exact example above.
+    8. Start with these exact imports:
+        import os
         from manim import *
         from manim_voiceover import VoiceoverScene
-        from manim_voiceover.services.gtts import GTTSService
-    8. Define a class `{scene_class_name}(VoiceoverScene)` with construct() containing all animations.
-    9. The code must be **standalone and directly runnable**, producing an MP4 with synced voiceover.
-    10. **Do not summarize, generalize, or skip steps.** Every step of the example must be concrete.
-    11. A beginner to the topic should fully understand all key topics, procedures, and solutions after watching the produced video animation and script.
-    13. Remember, you are creating two separate things: a text script with proper punctuation, and Manim python code with proper python syntax.
-    14. Only values of type VMobject can be added as submobjects of VGroup, but the value Mobject (at index 0 of parameter 9) is of type Mobject. You can try adding this value into a Group instead.
+        from manim_voiceover.services.elevenlabs import ElevenLabsService
+        from dotenv import load_dotenv
+
+        load_dotenv()
+        ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
+    9. For the speech service service, use voice_id: TVtDNgumMv4lb9zzFzA2
+    10. Define a class `{scene_class_name}(VoiceoverScene)` with construct() containing all animations.
+    11. The code must be **standalone and directly runnable**, producing an MP4 with synced voiceover.
+    12. **Do not summarize, generalize, or skip steps.** Every step of the example must be concrete.
 
     Return **only the Python code**, starting with `import os`, no explanations, no markdown, no extra text.
     """
