@@ -7,7 +7,7 @@ import traceback
 import uuid
 from pathlib import Path
 
-from anthropic import AsyncAnthropic
+import google.generativeai as genai
 from dotenv import load_dotenv
 from .fetch_context7_docs import fetch_context7_docs
 
@@ -18,8 +18,11 @@ async def generate_video_with_gtts(topic, event_callback=None):
 
     # Load environment variables
     load_dotenv()
-    API_KEY = os.getenv("ANTHROPIC_API_KEY")
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
+
+    # Configure Gemini
+    genai.configure(api_key=GEMINI_API_KEY)
 
     try:
         context7_docs = await fetch_context7_docs()
@@ -72,15 +75,10 @@ async def generate_video_with_gtts(topic, event_callback=None):
 
     print("Generating highly specific Manim code + voiceover...")
 
-    async_client = AsyncAnthropic(api_key=API_KEY)
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    response = await model.generate_content_async(prompt)
 
-    response = await async_client.messages.create(
-        max_tokens=max_tokens,
-        messages=[{"role": "user", "content": prompt}],
-        model="claude-sonnet-4-5-20250929",
-    )
-
-    manim_code = response.content[0].text.strip()
+    manim_code = response.text.strip()
     
     if event_callback:
         await event_callback("video_generation_manim_generated", {"message": "Manim code generated. Preparing to render video..."})
