@@ -90,8 +90,87 @@ ensure-mongodb:
 
 # Run backend server
 dev-backend: ensure-mongodb
-    cd backend/src/videre && uv run uvicorn videre.main:app --reload
+    cd backend && uv run uvicorn src.videre.main:app --reload
 
+# === Docker Commands ===
+
+# Build backend Docker image
+docker-build-backend:
+    docker build -t videre-backend:latest -f backend/Dockerfile backend/
+
+# Run backend in Docker (requires MongoDB running on host)
+docker-run-backend:
+    docker run -p 8000:8000 \
+      --env-file backend/.env \
+      -v $(pwd)/backend/output:/app/output \
+      -v $(pwd)/backend/tmp:/app/tmp \
+      -v $(pwd)/backend/media:/app/media \
+      --name videre-backend \
+      videre-backend:latest
+
+# Run backend in Docker with host network (for MongoDB connection)
+docker-run-backend-host:
+    docker run --network host \
+      --env-file backend/.env \
+      -v $(pwd)/backend/output:/app/output \
+      -v $(pwd)/backend/tmp:/app/tmp \
+      -v $(pwd)/backend/media:/app/media \
+      --name videre-backend \
+      videre-backend:latest
+
+# Stop running backend container
+docker-stop-backend:
+    docker stop videre-backend || true
+    docker rm videre-backend || true
+
+# View backend Docker logs
+docker-logs-backend:
+    docker logs -f videre-backend
+
+# === Backend Docker Info ===
+# Note: Backend Docker image includes all required dependencies:
+#   - Python 3.12
+#   - LaTeX (texlive-latex-extra) - Required for Manim rendering
+#   - FFmpeg - Required for video processing
+#   - All Python dependencies from pyproject.toml
+#
+# To use Docker:
+#   1. Build: just docker-build-backend
+#   2. Start MongoDB: just db-start
+#   3. Run: just docker-run-backend-host (uses host network to connect to MongoDB)
+#   4. View logs: just docker-logs-backend
+#   5. Stop: just docker-stop-backend
+
+# === Modal.com Commands ===
+# Deploy backend to Modal.com (serverless hosting)
+# Requires: pip install modal (and Modal account with API token)
+
+# Test Modal app locally
+modal-test:
+    modal run modal.py::test_startup
+
+# Deploy to Modal.com
+modal-deploy:
+    modal deploy modal.py
+
+# View Modal app logs
+modal-logs:
+    modal logs videre-backend
+
+# === Modal.com Info ===
+# Modal.com provides serverless hosting for Python applications
+# The modal.py file includes:
+#   - All LaTeX dependencies for Manim rendering
+#   - FFmpeg for video processing
+#   - All Python dependencies from pyproject.toml
+#   - 2GB memory and 2 CPU cores per request
+#   - 1 hour timeout for video generation
+#
+# To use Modal:
+#   1. Install: pip install modal
+#   2. Authenticate: modal token new
+#   3. Deploy: just modal-deploy
+#   4. View logs: just modal-logs
 
 # Lint backend code
 lint-backend:
