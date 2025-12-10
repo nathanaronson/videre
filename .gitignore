@@ -56,7 +56,6 @@ yarn-error.log*
 frontend/dist/
 frontend/.next/
 frontend/out/
-frontend/package-lock.json
 
 # Backend output
 backend/output/
@@ -71,7 +70,7 @@ backend/tmp/
 Thumbs.db
 
 # Lock files
-*.lock
+
 
 # Media
 **/media/
