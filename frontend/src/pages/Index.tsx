@@ -60,7 +60,7 @@ const Index = ({ topic, setTopic }: { topic: string, setTopic: (topic: string) =
             Prompt to Professor
           </h1>
           <p className="text-muted-foreground mb-10">
-            Describe any mathematical topic and get a video explanation. May take a few attempts to work.
+            Describe any mathematical topic and get a video explanation. May take a few attempts to work. Please do not rate limit.
           </p>
 
           {/* Input */}
@@ -80,7 +80,7 @@ const Index = ({ topic, setTopic }: { topic: string, setTopic: (topic: string) =
                   handleGenerate();
                 }
               }}
-              placeholder="e.g., How does Dijkstra's algorithm work?"
+              placeholder="e.g., Explain BFS vs DFS."
               className="w-full min-h-[120px] p-4 bg-card border border-border rounded-lg resize-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
               autoFocus
             />
