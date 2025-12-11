@@ -60,7 +60,7 @@ app = App(
 
 import modal
 @app.function(
-    timeout=3600,  # 1 hour timeout for video generation
+    timeout=36000,  # 1 hour timeout for video generation
     memory=(2048, 3072),  # 2-3GB memory
     cpu=2.0,  # 2 CPU cores
     secrets=[modal.Secret.from_name("videre")]

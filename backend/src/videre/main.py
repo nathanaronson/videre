@@ -13,7 +13,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 # from .integration import integrate
-from .database import close_db, connect_db, get_database
+from .database import close_db, connect_db, get_database, is_db_enabled
 from .models import ChatHistory, ChatHistoryListResponse, ChatHistoryResponse, ChatMessage
 from .utils.create_video import generate_video_with_gtts
 from .utils.send_to_aws import create_presigned_url, upload_file_to_s3
@@ -64,16 +64,18 @@ async def integrate_endpoint(payload: TopicPayload):
         try:
             print(payload)
 
-            # Create initial chat history entry
-            db = get_database()
-            chat_entry = {
-                "topic": payload.topic,
-                "chat_messages": [],
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
-            }
-            chat_result = await db.chat_histories.insert_one(chat_entry)
-            chat_id = str(chat_result.inserted_id)
+            # Create initial chat history entry (if MongoDB enabled)
+            chat_id = None
+            if is_db_enabled():
+                db = get_database()
+                chat_entry = {
+                    "topic": payload.topic,
+                    "chat_messages": [],
+                    "created_at": datetime.utcnow(),
+                    "updated_at": datetime.utcnow()
+                }
+                chat_result = await db.chat_histories.insert_one(chat_entry)
+                chat_id = str(chat_result.inserted_id)
 
             # Queue to stream events in real-time
             event_queue = asyncio.Queue()
@@ -146,17 +148,19 @@ async def integrate_endpoint(payload: TopicPayload):
 
             yield await _emit_event("url_created", {"message": "Presigned URL created successfully."})
 
-            # Update chat history with video information
-            await db.chat_histories.update_one(
-                {"_id": ObjectId(chat_id)},
-                {
-                    "$set": {
-                        "video_url": video_url,
-                        "video_id": video_uuid,
-                        "updated_at": datetime.utcnow()
+            # Update chat history with video information (if MongoDB enabled)
+            if is_db_enabled() and chat_id:
+                db = get_database()
+                await db.chat_histories.update_one(
+                    {"_id": ObjectId(chat_id)},
+                    {
+                        "$set": {
+                            "video_url": video_url,
+                            "video_id": video_uuid,
+                            "updated_at": datetime.utcnow()
+                        }
                     }
-                }
-            )
+                )
 
             # Final completion event with video_id and chat_id
             yield await _emit_event("complete", {
@@ -183,6 +187,8 @@ async def integrate_endpoint(payload: TopicPayload):
 @app.post("/api/chat-history", response_model=ChatHistoryResponse)
 async def create_chat_history(chat: ChatHistory):
     """Create a new chat history entry."""
+    if not is_db_enabled():
+        raise HTTPException(status_code=503, detail="MongoDB is disabled")
     db = get_database()
     chat_dict = chat.model_dump(exclude={"id"})
     chat_dict["created_at"] = datetime.utcnow()
@@ -205,6 +211,8 @@ async def create_chat_history(chat: ChatHistory):
 @app.get("/api/chat-history", response_model=ChatHistoryListResponse)
 async def get_chat_histories(skip: int = 0, limit: int = 50):
     """Get all chat histories with pagination."""
+    if not is_db_enabled():
+        raise HTTPException(status_code=503, detail="MongoDB is disabled")
     db = get_database()
 
     # Get total count
@@ -231,6 +239,8 @@ async def get_chat_histories(skip: int = 0, limit: int = 50):
 @app.get("/api/chat-history/{chat_id}", response_model=ChatHistoryResponse)
 async def get_chat_history(chat_id: str):
     """Get a specific chat history by ID."""
+    if not is_db_enabled():
+        raise HTTPException(status_code=503, detail="MongoDB is disabled")
     db = get_database()
 
     try:
@@ -255,6 +265,8 @@ async def get_chat_history(chat_id: str):
 @app.put("/api/chat-history/{chat_id}", response_model=ChatHistoryResponse)
 async def update_chat_history(chat_id: str, chat: ChatHistory):
     """Update an existing chat history."""
+    if not is_db_enabled():
+        raise HTTPException(status_code=503, detail="MongoDB is disabled")
     db = get_database()
 
     try:
@@ -287,6 +299,8 @@ async def update_chat_history(chat_id: str, chat: ChatHistory):
 @app.delete("/api/chat-history/{chat_id}")
 async def delete_chat_history(chat_id: str):
     """Delete a chat history by ID."""
+    if not is_db_enabled():
+        raise HTTPException(status_code=503, detail="MongoDB is disabled")
     db = get_database()
 
     try:
