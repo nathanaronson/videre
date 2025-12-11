@@ -1,15 +1,32 @@
+import ast
 import asyncio
 import os
 import re
 import subprocess
 import tempfile
-import traceback
 import uuid
 from pathlib import Path
 
 import google.generativeai as genai
 from dotenv import load_dotenv
 from .fetch_context7_docs import fetch_context7_docs
+
+
+def validate_python_syntax(code: str) -> tuple[bool, str | None]:
+    """Validate Python code syntax. Returns (is_valid, error_message)."""
+    try:
+        ast.parse(code)
+        return True, None
+    except SyntaxError as e:
+        return False, f"Line {e.lineno}: {e.msg}"
+
+
+def clean_manim_code(code: str) -> str:
+    """Clean up markdown and extra formatting from generated code."""
+    code = code.strip()
+    code = re.sub(r"^```(?:python)?", "", code, flags=re.MULTILINE).strip()
+    code = re.sub(r"```$", "", code, flags=re.MULTILINE).strip()
+    return code
 
 async def generate_video_with_gtts(topic, event_callback=None):
     # Generate UUID for this video
@@ -43,7 +60,7 @@ async def generate_video_with_gtts(topic, event_callback=None):
     You are an expert educator and Manim animator. 
     Given the topic: "{topic}", generate **one complete, end-to-end script and runnable Manim code** that teaches this concept visually. Follow these rules:
 
-    1. Create a **clear, step-by-step 1-minute script** (~150–180 words) for GTTS narration.
+    1. Create a **clear, step-by-step 15-second script** (~40-50 words) for GTTS narration.
     2. The narration must include **specific examples, concrete values, and reasoning**. 
     - For instance, if explaining a graph traversal: "We visit node A first because its distance 3 is the smallest among neighbors. Then we go to node B with distance 5..." 
     - The script should explicitly describe every step, value, and choice.
@@ -75,79 +92,161 @@ async def generate_video_with_gtts(topic, event_callback=None):
 
     print("Generating highly specific Manim code + voiceover...")
 
-    model = genai.GenerativeModel("gemini-2.0-flash")
-    response = await model.generate_content_async(prompt)
+    model = genai.GenerativeModel("gemini-2.5-flash")
+    project_root = Path(__file__).parent.parent.parent
 
-    manim_code = response.text.strip()
-    
-    if event_callback:
-        await event_callback("video_generation_manim_generated", {"message": "Manim code generated. Preparing to render video..."})
+    # Retry loop for syntax AND runtime errors (up to 3 attempts)
+    max_retries = 3
+    manim_code = None
+    last_error = None
+    error_type = None  # "syntax" or "runtime"
 
-    # Robust cleanup of any markdown backticks or language hints
-    manim_code = re.sub(r"^```(?:python)?", "", manim_code, flags=re.MULTILINE).strip()
-    manim_code = re.sub(r"```$", "", manim_code, flags=re.MULTILINE).strip()
+    for attempt in range(1, max_retries + 1):
+        print(f"Generation attempt {attempt}/{max_retries}...")
 
-    print("=" * 60)
-    print("GENERATED MANIM CODE:")
-    print("=" * 60)
-    print(manim_code)
-    print("=" * 60)
+        if attempt == 1:
+            current_prompt = prompt
+        else:
+            # Ask the model to fix the error
+            error_description = "syntax error" if error_type == "syntax" else "runtime error"
+            current_prompt = f"""
+The following Python code has a {error_description}:
 
-    # Save Manim code to a temporary file
-    temp_dir = tempfile.mkdtemp()
-    manim_file = Path(temp_dir) / "generated_scene.py"
-    with open(manim_file, "w") as f:
-        f.write(manim_code)
+```python
+{manim_code}
+```
 
-    print(f"Saved Manim code to temporary file: {manim_file}")
-    
-    if event_callback:
-        await event_callback("video_generation_status", {"message": "Rendering video with Manim (this may take a minute)..."})
+Error: {last_error}
 
-    try:
-        # Run Manim using uv from project root (using async subprocess)
-        project_root = Path(__file__).parent.parent.parent
+Please fix the {error_description} and return the corrected, complete Python code.
+Make sure to:
+- Fix the specific error mentioned above
+- Keep all imports and the class structure intact
+- Ensure all Manim objects and methods are used correctly
 
-        # Use asyncio.create_subprocess_exec for non-blocking execution
-        process = await asyncio.create_subprocess_exec(
-            "uv", "run", "manim", "-qh", str(manim_file), scene_class_name,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd=str(project_root),
-        )
+Return **only the Python code**, no explanations, no markdown backticks.
+"""
 
-        stdout, stderr = await process.communicate()
+        response = await model.generate_content_async(current_prompt)
+        manim_code = clean_manim_code(response.text)
 
-        if process.returncode != 0:
-            raise subprocess.CalledProcessError(
-                process.returncode,
-                ["uv", "run", "manim", "-qh", str(manim_file), scene_class_name],
-                stdout.decode(),
-                stderr.decode()
-            )
+        # Step 1: Validate syntax
+        is_valid, syntax_error = validate_python_syntax(manim_code)
 
-        print("Manim run complete.")
+        if not is_valid:
+            last_error = syntax_error
+            error_type = "syntax"
+            print(f"Syntax error on attempt {attempt}: {syntax_error}")
+            if event_callback:
+                await event_callback("video_generation_retry", {
+                    "message": f"Fixing syntax error (attempt {attempt}/{max_retries})...",
+                    "error": syntax_error
+                })
+            continue
+
+        print(f"Syntax validation passed on attempt {attempt}")
+
+        # Step 2: Try running Manim
+        if event_callback:
+            await event_callback("video_generation_manim_generated", {"message": f"Manim code generated (attempt {attempt}). Rendering..."})
+
+        print("=" * 60)
+        print("GENERATED MANIM CODE:")
+        print("=" * 60)
+        print(manim_code)
+        print("=" * 60)
+
+        # Save Manim code to a temporary file
+        temp_dir = tempfile.mkdtemp()
+        manim_file = Path(temp_dir) / "generated_scene.py"
+        with open(manim_file, "w") as f:
+            f.write(manim_code)
+
+        print(f"Saved Manim code to temporary file: {manim_file}")
 
         if event_callback:
-            await event_callback("video_generation_rendering_complete", {"message": "Video rendering complete!"})
-        print(stdout.decode())
-        if stderr:
-            print("STDERR:")
-            print(stderr.decode())
+            await event_callback("video_generation_status", {
+                "message": "Rendering video with Manim (this may take a minute)..."
+            })
 
-        # Manim saves the video relative to project_root (where we run it from)
-        # The video will be at: project_root / "media" / "videos" / "generated_scene" / "1080p60" / f"{scene_class_name}.mp4"
-        print(f"Video should be saved as: {scene_class_name}.mp4")
-        print(f"Video UUID: {video_uuid}")
+        try:
+            # Run Manim using uv from project root (using async subprocess)
+            process = await asyncio.create_subprocess_exec(
+                "uv", "run", "manim", "-qh", str(manim_file), scene_class_name,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=str(project_root),
+            )
 
-        return video_uuid, scene_class_name
+            stdout, stderr = await process.communicate()
 
-    except subprocess.CalledProcessError as e:
-        print(f"Error running Manim: {e}")
-        print(f"STDOUT: {e.stdout}")
-        print(f"STDERR: {e.stderr}")
-        return None, None
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        traceback.print_exc()
-        return None, None
+            if process.returncode != 0:
+                # Extract the error from stderr
+                stderr_text = stderr.decode()
+                # Try to get the most relevant error line
+                runtime_error = _extract_python_error(stderr_text)
+                raise subprocess.CalledProcessError(
+                    process.returncode,
+                    ["uv", "run", "manim", "-qh", str(manim_file), scene_class_name],
+                    stdout.decode(),
+                    runtime_error
+                )
+
+            # Success!
+            print("Manim run complete.")
+
+            if event_callback:
+                await event_callback("video_generation_rendering_complete", {"message": "Video rendering complete!"})
+            print(stdout.decode())
+            if stderr:
+                print("STDERR:")
+                print(stderr.decode())
+
+            print(f"Video should be saved as: {scene_class_name}.mp4")
+            print(f"Video UUID: {video_uuid}")
+
+            return video_uuid, scene_class_name
+
+        except subprocess.CalledProcessError as e:
+            last_error = e.stderr if e.stderr else str(e)
+            error_type = "runtime"
+            print(f"Runtime error on attempt {attempt}: {last_error}")
+            if event_callback:
+                await event_callback("video_generation_retry", {
+                    "message": f"Fixing runtime error (attempt {attempt}/{max_retries})...",
+                    "error": last_error
+                })
+            # Continue to next attempt
+
+    # All attempts failed
+    print(f"Failed to generate valid code after {max_retries} attempts")
+    if event_callback:
+        await event_callback("error", {
+            "message": f"Failed after {max_retries} attempts: {last_error}",
+            "error_type": error_type,
+            "error": last_error
+        })
+    return None, None
+
+
+def _extract_python_error(stderr: str) -> str:
+    """Extract the most relevant Python error from stderr output."""
+    lines = stderr.strip().split('\n')
+
+    # Look for common Python error patterns
+    error_lines = []
+    capture = False
+    for line in lines:
+        # Start capturing at Traceback
+        if 'Traceback (most recent call last):' in line:
+            capture = True
+            error_lines = [line]
+        elif capture:
+            error_lines.append(line)
+
+    if error_lines:
+        # Return last few lines which usually contain the actual error
+        return '\n'.join(error_lines[-10:])
+
+    # Fallback: return last 500 chars
+    return stderr[-500:] if len(stderr) > 500 else stderr
