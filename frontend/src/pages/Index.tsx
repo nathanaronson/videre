@@ -60,7 +60,7 @@ const Index = ({ topic, setTopic }: { topic: string, setTopic: (topic: string) =
             Prompt to Professor
           </h1>
           <p className="text-muted-foreground mb-10">
-            Describe any mathematical topic and get a video explanation.
+            Describe any mathematical topic and get a video explanation. May take a few attempts to work.
           </p>
 
           {/* Input */}
